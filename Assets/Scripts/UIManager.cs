@@ -7,9 +7,6 @@ using TMPro;
 
 public class UIManager : MonoBehaviour, IPointerClickHandler
 {
-    public List<GameObject> RoadTilePrefab;
-    private List<GameObject> _RoadTileName = new List<GameObject>();
-
     public GameObject RoadTileContent;
     public GameObject RoadTileNamePrefab;
 
@@ -17,19 +14,16 @@ public class UIManager : MonoBehaviour, IPointerClickHandler
 
     private void Start()
     {
-        InitializeScrollViewContent();
-
         raycaster = GetComponentInParent<GraphicRaycaster>();
-    }
 
-    private void InitializeScrollViewContent()
-    {
-        for(int count = 0; count<RoadTilePrefab.Count; count++)
+        string[] names = PrefabManager.GetRoadNames();
+
+        for (int count = 0; count < names.Length; count++)
         {
-            RoadTileNamePrefab.GetComponent<TextMeshProUGUI>().text = RoadTilePrefab[count].gameObject.name;
-            _RoadTileName.Add(RoadTileNamePrefab);
+            RoadTileNamePrefab.GetComponent<TextMeshProUGUI>().text = names[count];
+
             GameObject go = Instantiate(RoadTileNamePrefab);
-            go.transform.name = RoadTilePrefab[count].gameObject.name;
+            go.transform.name = names[count];
             go.transform.SetParent(RoadTileContent.transform);
         }
     }
@@ -43,8 +37,6 @@ public class UIManager : MonoBehaviour, IPointerClickHandler
 
         foreach (RaycastResult result in results)
             if (result.gameObject.tag.Equals("RoadTile"))
-                Debug.Log(result.gameObject.transform.GetSiblingIndex());
-
-        
+                GameManager.SetCurrentPrefab(result.gameObject.transform.GetSiblingIndex());
     }
 }

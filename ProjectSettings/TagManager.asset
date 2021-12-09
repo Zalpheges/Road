@@ -5,14 +5,16 @@ TagManager:
   serializedVersion: 2
   tags:
   - RoadTile
+  - Road
+  - Board
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Board
   - Water
   - UI
-  - 
+  - Road
   - 
   - 
   - 

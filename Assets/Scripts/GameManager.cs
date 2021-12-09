@@ -168,7 +168,6 @@ public class GameManager : MonoBehaviour
     {
         if (current)
         {
-            current.transform.parent = transform;
             current = null;
         }
 

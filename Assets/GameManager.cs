@@ -40,8 +40,10 @@ public class GameManager : MonoBehaviour
 
     private int currentId;
     private GameObject current;
+    private GameObject currentEdit;
 
     private bool pointerInUI = false;
+    private bool inEditMode = false;
 
     private Dictionary<Vector3Int, int> roads;
 
@@ -59,6 +61,9 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
+        if (inEditMode)
+            print("inEdit");
+
         if (!current)
             return;
 
@@ -71,11 +76,12 @@ public class GameManager : MonoBehaviour
 
             if (hit.transform.tag == "Board" && !pointerInUI)
             {
-                current.SetActive(true);
 
                 Vector3Int position = Vector3Int.RoundToInt(hit.point);
 
                 current.transform.position = position;
+
+                current.SetActive(roads.ContainsKey(position) ? false : true); 
 
                 if (Input.GetMouseButton(0))
                 {
@@ -87,7 +93,8 @@ public class GameManager : MonoBehaviour
                     }
                     else if (Input.GetMouseButtonDown(0))
                     {
-                        // Selectionner, surligner, tourner
+                        inEditMode = true;
+                        currentEdit = current;
                     }
                 }
             }

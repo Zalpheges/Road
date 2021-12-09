@@ -34,6 +34,16 @@ public class GameManager : MonoBehaviour
             foreach (var road in map)
                 roads.Add(new Road(road.Value, road.Key));
         }
+
+        public Dictionary<Vector3Int, int> ToDictionary()
+        {
+            Dictionary<Vector3Int, int> dictionary = new Dictionary<Vector3Int, int>(roads.Count);
+
+            foreach (Road road in roads)
+                dictionary.Add(road.position, road.id);
+
+            return dictionary;
+        }
     }
 
     private static GameManager instance;
@@ -49,11 +59,21 @@ public class GameManager : MonoBehaviour
     {
         instance = this;
 
-        roads = new Dictionary<Vector3Int, int>();
+        if (File.Exists(Path.Combine(Application.persistentDataPath, "save.json")))
+        {
+            Map map = JsonUtility.FromJson<Map>(File.ReadAllText(Path.Combine(Application.persistentDataPath, "save.json")));
+
+            roads = map.ToDictionary();
+        }
+        else
+            roads = new Dictionary<Vector3Int, int>();
     }
 
     private void Start()
     {
+        foreach (KeyValuePair<Vector3Int, int> road in roads)
+            Instantiate(PrefabManager.GetRoad(road.Value), transform).transform.position = road.Key;
+
         CreateCurrent();
     }
 
@@ -128,8 +148,7 @@ public class GameManager : MonoBehaviour
     {
         Map map = new Map(roads);
 
-        string jsonData = JsonUtility.ToJson(map, true);
-        File.WriteAllText("/save.json", jsonData);
+        File.WriteAllText(Path.Combine(Application.persistentDataPath, "save.json"), JsonUtility.ToJson(map, true));
     }
 
     public static void PointerInUI()
@@ -142,10 +161,3 @@ public class GameManager : MonoBehaviour
         instance.pointerInUI = false;
     }
 }
-
-// Paul
-// TODO : Empêcher poser route si click sur ui
-// TODO : 
-
-// TODO : Système de sauvergarde
-// TODO : Système de selection

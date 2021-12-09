@@ -82,8 +82,27 @@ public class Outline : MonoBehaviour {
 
   void Awake() {
 
-    // Cache renderers
-    renderers = GetComponentsInChildren<Renderer>();
+        foreach (var skinnedMeshRenderer in GetComponentsInChildren<SkinnedMeshRenderer>())
+        {
+            if (skinnedMeshRenderer.sharedMesh.subMeshCount > 1)
+            {
+                skinnedMeshRenderer.sharedMesh.subMeshCount = skinnedMeshRenderer.sharedMesh.subMeshCount + 1;
+                skinnedMeshRenderer.sharedMesh.SetTriangles(skinnedMeshRenderer.sharedMesh.triangles, skinnedMeshRenderer.sharedMesh.subMeshCount - 1);
+            }
+
+        }
+
+        foreach (var meshFilter in GetComponentsInChildren<MeshFilter>())
+        {
+            if (meshFilter.sharedMesh.subMeshCount > 1)
+            {
+                meshFilter.sharedMesh.subMeshCount = meshFilter.sharedMesh.subMeshCount + 1;
+                meshFilter.sharedMesh.SetTriangles(meshFilter.sharedMesh.triangles, meshFilter.sharedMesh.subMeshCount - 1);
+            }
+        }
+
+        // Cache renderers
+        renderers = GetComponentsInChildren<Renderer>();
 
     // Instantiate outline materials
     outlineMaskMaterial = Instantiate(Resources.Load<Material>(@"Materials/OutlineMask"));
@@ -267,7 +286,7 @@ public class Outline : MonoBehaviour {
         outlineFillMaterial.SetFloat("_OutlineWidth", outlineWidth);
         break;
 
-      case Mode.SilhouetteOnly:
+            case Mode.SilhouetteOnly:
         outlineMaskMaterial.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.LessEqual);
         outlineFillMaterial.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Greater);
         outlineFillMaterial.SetFloat("_OutlineWidth", 0);

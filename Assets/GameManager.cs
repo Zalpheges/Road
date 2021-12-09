@@ -41,6 +41,8 @@ public class GameManager : MonoBehaviour
     private int currentId;
     private GameObject current;
 
+    private bool pointerInUI = false;
+
     private Dictionary<Vector3Int, int> roads;
 
     private void Awake()
@@ -67,7 +69,7 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log(hit.transform.tag);
 
-            if (hit.transform.tag == "Board")
+            if (hit.transform.tag == "Board" && !pointerInUI)
             {
                 current.SetActive(true);
 
@@ -128,6 +130,16 @@ public class GameManager : MonoBehaviour
 
         string jsonData = JsonUtility.ToJson(map, true);
         File.WriteAllText("/save.json", jsonData);
+    }
+
+    public static void PointerInUI()
+    {
+        instance.pointerInUI = true;
+    }
+
+    public static void PointerNotInUI()
+    {
+        instance.pointerInUI = false;
     }
 }
 

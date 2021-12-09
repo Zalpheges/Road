@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 
-public class UIManager : MonoBehaviour, IPointerClickHandler
+public class UIManager : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     public GameObject RoadTileContent;
     public GameObject RoadTileNamePrefab;
@@ -30,7 +30,6 @@ public class UIManager : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData pointerEventData)
     {
-      
         List<RaycastResult> results = new List<RaycastResult>();
 
         raycaster.Raycast(pointerEventData, results);
@@ -38,5 +37,15 @@ public class UIManager : MonoBehaviour, IPointerClickHandler
         foreach (RaycastResult result in results)
             if (result.gameObject.tag.Equals("RoadTile"))
                 GameManager.SetCurrentPrefab(result.gameObject.transform.GetSiblingIndex());
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        GameManager.PointerInUI();
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        GameManager.PointerNotInUI();
     }
 }

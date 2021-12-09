@@ -50,10 +50,10 @@ public class GameManager : MonoBehaviour
 
     private int currentId;
     private GameObject current;
-    private GameObject currentEdit;
+    public Transform currentEdit;
 
     private bool pointerInUI = false;
-    private bool inEditMode = false;
+    public bool inEditMode = false;
 
     private Dictionary<Vector3Int, int> roads;
 
@@ -81,40 +81,57 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (inEditMode)
-            print("inEdit");
-
         if (!current)
             return;
+
+        if (inEditMode)
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                inEditMode = false;
+            }
+            else if (Input.GetKeyDown(KeyCode.R))
+            {
+                currentEdit.Rotate(new Vector3(0f, 90f));
+            }
+            else if (Input.GetKeyDown(KeyCode.Delete))
+            {
+                roads.Remove(Vector3Int.RoundToInt(currentEdit.position));
+
+                Destroy(currentEdit.gameObject);
+                inEditMode = false;
+            }
+        }
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit))
         {
-            Debug.Log(hit.transform.tag);
-
             if (hit.transform.tag == "Board" && !pointerInUI)
             {
-
                 Vector3Int position = Vector3Int.RoundToInt(hit.point);
 
                 current.transform.position = position;
 
-                current.SetActive(roads.ContainsKey(position) ? false : true); 
+                current.SetActive(roads.ContainsKey(position) || inEditMode ? false : true); 
 
                 if (Input.GetMouseButton(0))
                 {
                     if (!roads.ContainsKey(position))
                     {
-                        roads.Add(Vector3Int.RoundToInt(current.transform.position), currentId);
+                        if (!inEditMode)
+                        {
+                            roads.Add(Vector3Int.RoundToInt(current.transform.position), currentId);
 
-                        FreeCurrent();
+                            FreeCurrent();
+                        }
                     }
                     else if (Input.GetMouseButtonDown(0))
                     {
                         inEditMode = true;
-                        currentEdit = current;
+
+                        SelectRoad(position);
                     }
                 }
             }
@@ -125,11 +142,33 @@ public class GameManager : MonoBehaviour
             current.SetActive(false);
     }
 
+    private void SelectRoad(Vector3Int position)
+    {
+        if (currentEdit)
+        {
+            if (currentEdit.GetComponent<Outline>())
+                Destroy(currentEdit.GetComponent<Outline>());
+        }
+
+        foreach (Transform child in transform)
+        {
+            if (child != transform && child.position == position)
+            {
+                currentEdit = child;
+                Outline outline = currentEdit.gameObject.AddComponent<Outline>();
+
+                outline.OutlineColor = Color.red;
+                outline.OutlineMode = Outline.Mode.OutlineVisible;
+                outline.OutlineWidth = 10f;
+            }
+        }
+    }
+
     private void FreeCurrent()
     {
         if (current)
         {
-            current.transform.parent = null;
+            current.transform.parent = transform;
             current = null;
         }
 
@@ -138,7 +177,7 @@ public class GameManager : MonoBehaviour
 
     private void CreateCurrent()
     {
-        current = Instantiate(PrefabManager.GetRoad(currentId), transform);
+        current = Instantiate(PrefabManager.GetRoad(currentId));
     }
 
     public static void SetCurrentPrefab(int id)
